@@ -1,6 +1,8 @@
-import { getQuizSummaries } from "@/lib/questions";
+import { listQuizzes } from "@/lib/quiz-data";
+import { toSummary } from "@/lib/questions";
 import { NextResponse } from "next/server";
 
 export async function GET() {
-  return NextResponse.json({ quizzes: getQuizSummaries() });
+  const quizzes = await listQuizzes();
+  return NextResponse.json({ quizzes: quizzes.map(toSummary) });
 }

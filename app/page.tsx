@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { getQuizSummaries, type QuizSummary } from "@/lib/questions";
+import { listQuizzes } from "@/lib/quiz-data";
+import { toSummary, type QuizSummary } from "@/lib/questions";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -13,8 +14,9 @@ const difficultyStyles: Record<QuizSummary["difficulty"], string> = {
   hard: "bg-rose-500/15 text-rose-300 ring-rose-500/30",
 };
 
-export default function Home() {
-  const quizzes = getQuizSummaries();
+export default async function Home() {
+  const quizzes = await listQuizzes();
+  const summaries = quizzes.map(toSummary);
 
   return (
     <main className="mx-auto w-full max-w-5xl px-5 py-14 sm:px-8">
@@ -26,43 +28,52 @@ export default function Home() {
           Quiz Quest
         </h1>
         <p className="mx-auto mt-5 max-w-xl text-balance text-lg text-slate-400">
-          Test your knowledge across trivia, science, technology, and geography. Pick a quiz below to begin.
+          Test your knowledge across trivia, science, technology, and geography. Sign in to save your results.
         </p>
       </header>
 
-      <section className="mt-14 grid gap-6 sm:grid-cols-2">
-        {quizzes.map((quiz) => (
-          <Link
-            key={quiz.id}
-            href={`/quiz/${quiz.id}`}
-            className="group relative flex flex-col rounded-2xl bg-white/[0.04] p-7 ring-1 ring-white/10 transition-all duration-200 hover:-translate-y-1 hover:bg-white/[0.07] hover:ring-white/20"
-          >
-            <div className="flex items-center justify-between">
-              <span className="text-4xl" aria-hidden="true">
-                {quiz.icon}
-              </span>
-              <span
-                className={`rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-wide ring-1 ${difficultyStyles[quiz.difficulty]}`}
-              >
-                {quiz.difficulty}
-              </span>
-            </div>
-            <h2 className="mt-5 text-xl font-bold text-white">{quiz.title}</h2>
-            <p className="mt-2 flex-1 text-sm text-slate-400">{quiz.description}</p>
-            <div className="mt-6 flex items-center justify-between border-t border-white/5 pt-5">
-              <span className="text-sm font-medium text-slate-300">
-                {quiz.questionCount} questions · {quiz.category}
-              </span>
-              <span className="text-sm font-semibold text-indigo-400 transition-transform group-hover:translate-x-1">
-                Start →
-              </span>
-            </div>
-          </Link>
-        ))}
-      </section>
+      {summaries.length === 0 ? (
+        <div className="mt-14 rounded-2xl bg-white/[0.04] p-10 text-center ring-1 ring-white/10">
+          <p className="text-slate-300">No quizzes yet.</p>
+          <p className="mt-2 text-sm text-slate-500">
+            An admin can add quizzes from the <Link href="/admin" className="text-indigo-400 hover:text-indigo-300">admin dashboard</Link>.
+          </p>
+        </div>
+      ) : (
+        <section className="mt-14 grid gap-6 sm:grid-cols-2">
+          {summaries.map((quiz) => (
+            <Link
+              key={quiz.id}
+              href={`/quiz/${quiz.id}`}
+              className="group relative flex flex-col rounded-2xl bg-white/[0.04] p-7 ring-1 ring-white/10 transition-all duration-200 hover:-translate-y-1 hover:bg-white/[0.07] hover:ring-white/20"
+            >
+              <div className="flex items-center justify-between">
+                <span className="text-4xl" aria-hidden="true">
+                  {quiz.icon}
+                </span>
+                <span
+                  className={`rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-wide ring-1 ${difficultyStyles[quiz.difficulty]}`}
+                >
+                  {quiz.difficulty}
+                </span>
+              </div>
+              <h2 className="mt-5 text-xl font-bold text-white">{quiz.title}</h2>
+              <p className="mt-2 flex-1 text-sm text-slate-400">{quiz.description}</p>
+              <div className="mt-6 flex items-center justify-between border-t border-white/5 pt-5">
+                <span className="text-sm font-medium text-slate-300">
+                  {quiz.questionCount} questions · {quiz.category}
+                </span>
+                <span className="text-sm font-semibold text-indigo-400 transition-transform group-hover:translate-x-1">
+                  Start →
+                </span>
+              </div>
+            </Link>
+          ))}
+        </section>
+      )}
 
       <footer className="mt-20 text-center text-sm text-slate-600">
-        Built with Next.js · Deploy free on Vercel
+        Built with Next.js + Supabase · Deploy free on Vercel
       </footer>
     </main>
   );

@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { getQuiz, toClientQuiz } from "@/lib/questions";
+import { getQuiz } from "@/lib/quiz-data";
+import { toClientQuiz } from "@/lib/questions";
 import QuizPlayer from "./quiz-player";
 
 export default async function QuizPage({
@@ -9,7 +10,7 @@ export default async function QuizPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const quiz = getQuiz(id);
+  const quiz = await getQuiz(id);
 
   if (!quiz) {
     notFound();
@@ -24,7 +25,7 @@ export default async function QuizPage({
       </div>
 
       <header className="mb-10 flex items-center gap-4">
-        <span className="text-4xl" aria-hidden="true">
+        <span className="-mt-3 text-4xl" aria-hidden="true">
           {quiz.icon}
         </span>
         <div>

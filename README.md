@@ -1,14 +1,21 @@
 # Quiz Quest 🎯
 
-A full-stack trivia quiz web app built with **Next.js 16** (App Router), **React 19**, **TypeScript**, and **Tailwind CSS v4**. Deployable on the Vercel free tier with zero external services — no database, no API keys.
+A full-stack trivia quiz app built with **Next.js 16** (App Router), **React 19**, **TypeScript**, **Tailwind CSS v4**, and **Supabase**. Deployable on the Vercel free tier.
 
-## What's included
+## Features
 
-- **Home page** — a catalog of quizzes with category, difficulty, and question count
-- **Quiz player** — one-question-at-a-time flow with progress bar, previous/next navigation, and free revision of answers until you submit
-- **Server-side scoring** — answers are graded by a Route Handler; the correct answers and explanations never reach the browser until after you submit
-- **Results review** — score breakdown with per-question explanations and a "Try again" reset
-- **Fully typed** end to end, plus a custom 404 page
+**For participants**
+- Browse the quiz catalog (category, difficulty, question count)
+- One-question-at-a-time player with progress bar and free navigation
+- Instant scoring with a per-question review and explanations
+- Sign in / sign up with **Google** or **email + password**
+- Results are saved to your account
+
+**For admins**
+- Dashboard of all participant results (email, quiz, score, percentage, date)
+- Summary stats: participant count, total attempts, average score
+- Create quizzes with any number of questions (mark the correct answer per question)
+- Delete quizzes (and their questions) at any time
 
 ## Tech stack
 
@@ -17,13 +24,54 @@ A full-stack trivia quiz web app built with **Next.js 16** (App Router), **React
 | Framework | Next.js 16.3.6 (App Router, Turbopack) |
 | UI | React 19.2, Tailwind CSS v4 |
 | Language | TypeScript 5 |
+| Database + Auth | Supabase (Postgres, email/password, Google OAuth) |
 | API | Route Handlers (`app/api/.../route.ts`) |
-| Data | In-repo question bank (`lib/questions.ts`) — no DB needed |
 
-## Getting started
+## Setup
+
+### 1. Create a Supabase project
+
+1. Sign up at [supabase.com](https://supabase.com) (free tier: 500MB database, 50,000 monthly users)
+2. Create a new project and wait for it to provision
+3. Go to **Settings → API** and note:
+   - `Project URL`
+   - `anon` public key
+   - `service_role` secret (keep this server-side only)
+
+### 2. Configure environment variables
+
+Copy `.env.example` to `.env.local` and fill in the values:
+
+```bash
+cp .env.example .env.local
+```
+
+```env
+NEXT_PUBLIC_SUPABASE_URL=https://YOUR-PROJECT.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-public-key
+SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
+ADMIN_EMAILS=you@example.com
+```
+
+`ADMIN_EMAILS` is a comma-separated allowlist controlling who can open the admin dashboard. Only these accounts see the Admin link and can create/delete quizzes.
+
+### 3. Create the database schema
+
+Open the Supabase **SQL Editor**, paste the contents of [`supabase/schema.sql`](./supabase/schema.sql), and run it. This creates the `quizzes`, `questions`, `attempts`, and `profiles` tables, enables Row Level Security, and sets up the trigger that creates a profile row whenever a user signs up.
+
+### 4. Enable Google sign-in
+
+1. In Supabase, go to **Authentication → Providers → Google** and enable it
+2. Follow the instructions to create a Google Cloud OAuth credential (Supabase shows the exact redirect URL to allow)
+3. Add the same redirect URL to your Google Cloud Console authorization list
+
+Email + password works out of the box with no extra setup.
+
+### 5. Install and seed
 
 ```bash
 npm install
+npm run seed   # loads the four starter quizzes into Supabase
 npm run dev
 ```
 
@@ -36,100 +84,90 @@ npm run build
 npm run start
 ```
 
-## API reference
+## How admin access works
 
-| Method | Endpoint | Description |
-| --- | --- | --- |
-| `GET` | `/api/quizzes` | List all quiz summaries (no answers exposed) |
-| `GET` | `/api/quizzes/[id]` | Get one quiz with questions and options — **correct answers are stripped** |
-| `POST` | `/api/quizzes/[id]/submit` | Grade answers; returns score and full breakdown |
+There is no admin role in the database. The `ADMIN_EMAILS` environment variable is an allowlist, checked on every request:
 
-**Submit body**
-
-```json
-{
-  "answers": {
-    "ge-1": "Himalayas",
-    "ge-2": "Sweden"
-  }
+```ts
+export function isAdminEmail(email: string | null | undefined): boolean {
+  // splits ADMIN_EMAILS on commas and compares case-insensitively
 }
 ```
 
-Keys are question ids; values are the option strings the player selected. Unanswered questions are graded as incorrect and reported with `"selected": null`.
+To grant or revoke admin access, change the env var and redeploy. On Vercel: **Settings → Environment Variables**.
 
 ## Project structure
 
 ```
 app/
-├─ api/quizzes/
-│  ├─ route.ts                  # GET /api/quizzes
-│  ├─ [id]/route.ts             # GET /api/quizzes/[id]
-│  └─ [id]/submit/route.ts      # POST /api/quizzes/[id]/submit
+├─ admin/
+│  ├─ page.tsx                       # Admin dashboard (all results)
+│  └─ quizzes/
+│     ├─ page.tsx                    # Quiz management
+│     └─ quiz-manager.tsx            # Client: create/delete quizzes
+├─ api/
+│  ├─ admin/quizzes/
+│  │  ├─ route.ts                    # POST/GET quizzes (admin only)
+│  │  └─ [id]/route.ts               # DELETE quiz (admin only)
+│  └─ quizzes/
+│     ├─ route.ts                    # GET quiz summaries
+│     ├─ [id]/route.ts               # GET quiz (answers stripped)
+│     └─ [id]/submit/route.ts        # POST → grade + save attempt
+├─ auth/callback/route.ts            # Google OAuth callback
 ├─ quiz/[id]/
-│  ├─ page.tsx                  # Server component: loads quiz, renders player
-│  └─ quiz-player.tsx           # Client component: interactive quiz flow
-├─ page.tsx                     # Home: quiz catalog
-├─ layout.tsx                   # Root layout + metadata
-├─ not-found.tsx                # 404 page
-└─ globals.css                  # Tailwind v4 + theme
+│  ├─ page.tsx                       # Server component: loads quiz
+│  └─ quiz-player.tsx                # Client: interactive quiz flow
+├─ signin/page.tsx                   # Sign in
+├─ signup/page.tsx                    # Sign up
+├─ auth-form.tsx                     # Google + email/password form
+├─ header.tsx                        # Auth-aware navigation
+├─ page.tsx                          # Home: quiz catalog
+├─ layout.tsx
+├─ not-found.tsx
+└─ globals.css
 lib/
-└─ questions.ts                 # Question bank, types, grading logic
+├─ questions.ts                      # Types + grading logic
+├─ quiz-data.ts                      # Supabase data layer (reads/writes)
+├─ seed-data.ts                      # The four starter quizzes
+└─ supabase/
+   ├─ server.ts                      # Server + service clients
+   └─ browser.ts                     # Browser client
+supabase/
+└─ schema.sql                        # Tables, RLS, profile trigger
+scripts/
+└─ seed.ts                           # Loads starter quizzes
+proxy.ts                              # Session refresh (Next 16 name for middleware)
 ```
 
-## Adding your own questions
+## API reference
 
-Edit `lib/questions.ts` and add an entry to the `QUIZZES` array:
-
-```ts
-{
-  id: "my-quiz",
-  title: "My Quiz",
-  description: "A short description.",
-  category: "Custom",
-  icon: "🎯",
-  difficulty: "easy", // "easy" | "medium" | "hard"
-  questions: [
-    {
-      id: "mq-1",
-      question: "What is 2 + 2?",
-      options: ["3", "4", "5", "6"],
-      correctIndex: 1,
-      explanation: "Two plus two equals four.",
-    },
-  ],
-}
-```
-
-The quiz appears on the home page automatically, and the API + dynamic route pick it up with no other changes.
+| Method | Endpoint | Auth | Description |
+| --- | --- | --- | --- |
+| `GET` | `/api/quizzes` | Public | List all quiz summaries |
+| `GET` | `/api/quizzes/[id]` | Public | Get one quiz — correct answers stripped |
+| `POST` | `/api/quizzes/[id]/submit` | Required | Grade answers, save the attempt, return score |
+| `GET` | `/api/admin/quizzes` | Admin | List quizzes with questions |
+| `POST` | `/api/admin/quizzes` | Admin | Create a quiz with questions |
+| `DELETE` | `/api/admin/quizzes/[id]` | Admin | Delete a quiz and its questions |
 
 ## Deploying to Vercel (free tier)
 
-Since the app needs no database or environment variables, the free **Hobby** tier is enough.
+The app uses Supabase for data and auth, so Vercel's free **Hobby** tier is enough.
 
-**Option A — Vercel dashboard**
+1. Push to GitHub.
+2. On [vercel.com](https://vercel.com), **Add New → Project** and import the repo.
+3. Add the environment variables (same as `.env.local`):
+   - `NEXT_PUBLIC_SUPABASE_URL`
+   - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+   - `SUPABASE_SERVICE_ROLE_KEY`
+   - `ADMIN_EMAILS`
+4. Deploy.
 
-1. Push this project to a GitHub/GitLab/Bitbucket repository.
-2. Sign in to [vercel.com](https://vercel.com) and click **Add New → Project**.
-3. Import the repository. Vercel auto-detects Next.js — the default build settings are correct:
-   - Build command: `next build`
-   - Output: handled automatically by the Next.js runtime
-4. Click **Deploy**. Your quiz app is live in about a minute.
+## Security notes
 
-**Option B — Vercel CLI**
-
-```bash
-npm i -g vercel
-vercel        # preview deployment
-vercel --prod # production deployment
-```
-
-No environment variables to configure. The whole app fits comfortably within the Hobby tier limits (static + a few lightweight serverless API routes).
-
-## Notes
-
-- The question bank lives in the repo, so it's easy to fork and customize.
-- Correct answers and explanations are never included in the client payload — grading happens on the server in the `POST .../submit` route handler.
-- The 404 route handles unknown quiz ids gracefully.
+- Correct answers and explanations never reach the browser until after submission — grading is server-side.
+- Writes and cross-user reads use the service-role key from API routes that verify admin access first; Row Level Security guards direct table access.
+- `SUPABASE_SERVICE_ROLE_KEY` is server-only and must never be prefixed with `NEXT_PUBLIC_`.
 
 ## License
 

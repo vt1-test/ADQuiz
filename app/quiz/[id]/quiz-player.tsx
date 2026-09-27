@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo, useRef, useEffect } from "react";
 import Link from "next/link";
 import type { QuizClient, GradeResult } from "@/lib/questions";
 
@@ -33,6 +33,11 @@ export default function QuizPlayer({ quiz }: QuizPlayerProps) {
   const answeredCount = Object.keys(answers).length;
   const isLast = current === total - 1;
   const progress = Math.round(((current + 1) / total) * 100);
+  const startedAt = useRef<number>(Date.now());
+
+  useEffect(() => {
+    startedAt.current = Date.now();
+  }, []);
 
   const pick = useCallback(
     (option: string) => {
@@ -57,7 +62,7 @@ export default function QuizPlayer({ quiz }: QuizPlayerProps) {
       const res = await fetch(`/api/quizzes/${quiz.id}/submit`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ answers }),
+        body: JSON.stringify({ answers, timeMs: Date.now() - startedAt.current }),
       });
       if (!res.ok) {
         const data = (await res.json().catch(() => null)) as { error?: string } | null;

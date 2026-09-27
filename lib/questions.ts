@@ -30,7 +30,6 @@ export interface QuizClient {
   category: string;
   icon: string;
   difficulty: Difficulty;
-  questionCount: number;
   questions: Array<Pick<Question, "id" | "question" | "options">>;
 }
 
@@ -42,303 +41,6 @@ export interface QuizSummary {
   icon: string;
   difficulty: Difficulty;
   questionCount: number;
-}
-
-export const QUIZZES: Quiz[] = [
-  {
-    id: "general-knowledge",
-    title: "General Knowledge",
-    description: "A broad warm-up round of classic trivia.",
-    category: "Trivia",
-    icon: "🧠",
-    difficulty: "easy",
-    questions: [
-      {
-        id: "gk-1",
-        question: "What is the capital city of Australia?",
-        options: ["Sydney", "Melbourne", "Canberra", "Perth"],
-        correctIndex: 2,
-        explanation: "Canberra was purpose-built as the capital, a compromise between rivals Sydney and Melbourne.",
-      },
-      {
-        id: "gk-2",
-        question: "How many continents are there on Earth?",
-        options: ["5", "6", "7", "8"],
-        correctIndex: 2,
-        explanation: "The seven-continent model: Africa, Antarctica, Asia, Australia/Oceania, Europe, North America, South America.",
-      },
-      {
-        id: "gk-3",
-        question: "Which is the largest ocean on Earth?",
-        options: ["Atlantic Ocean", "Indian Ocean", "Arctic Ocean", "Pacific Ocean"],
-        correctIndex: 3,
-        explanation: "The Pacific covers roughly 165 million km² — larger than all land area combined.",
-      },
-      {
-        id: "gk-4",
-        question: "What is the chemical symbol for gold?",
-        options: ["Gd", "Au", "Ag", "Go"],
-        correctIndex: 1,
-        explanation: "'Au' comes from the Latin word for gold, aurum. 'Ag' is silver (argentum).",
-      },
-      {
-        id: "gk-5",
-        question: "Who wrote the play 'Romeo and Juliet'?",
-        options: ["Charles Dickens", "Oscar Wilde", "William Shakespeare", "Jane Austen"],
-        correctIndex: 2,
-        explanation: "Shakespeare wrote it in the early part of his career, around 1594-1596.",
-      },
-      {
-        id: "gk-6",
-        question: "What is the smallest prime number?",
-        options: ["0", "1", "2", "3"],
-        correctIndex: 2,
-        explanation: "By the modern definition, 1 is not prime, so 2 is the smallest prime — and the only even one.",
-      },
-      {
-        id: "gk-7",
-        question: "In which year did the first humans land on the Moon?",
-        options: ["1965", "1969", "1972", "1958"],
-        correctIndex: 1,
-        explanation: "Apollo 11 landed on 20 July 1969; Neil Armstrong was first to step onto the surface.",
-      },
-      {
-        id: "gk-8",
-        question: "What is the largest planet in our solar system?",
-        options: ["Saturn", "Neptune", "Earth", "Jupiter"],
-        correctIndex: 3,
-        explanation: "Jupiter is so massive that all the other planets combined would fit inside it more than twice.",
-      },
-    ],
-  },
-  {
-    id: "science",
-    title: "Science & Nature",
-    description: "Biology, chemistry, and physics fundamentals.",
-    category: "Science",
-    icon: "🔬",
-    difficulty: "medium",
-    questions: [
-      {
-        id: "sc-1",
-        question: "What gas do plants absorb for photosynthesis?",
-        options: ["Oxygen", "Carbon dioxide", "Nitrogen", "Hydrogen"],
-        correctIndex: 1,
-        explanation: "Plants take in CO₂ and release oxygen — the reverse of animal respiration.",
-      },
-      {
-        id: "sc-2",
-        question: "Which organelle is known as the powerhouse of the cell?",
-        options: ["Ribosome", "Nucleus", "Mitochondrion", "Golgi apparatus"],
-        correctIndex: 2,
-        explanation: "Mitochondria generate ATP, the cell's main energy currency.",
-      },
-      {
-        id: "sc-3",
-        question: "Approximately how many bones are in the adult human body?",
-        options: ["186", "206", "226", "256"],
-        correctIndex: 1,
-        explanation: "Adults have 206 bones; infants are born with around 270, many of which fuse over time.",
-      },
-      {
-        id: "sc-4",
-        question: "What is the most abundant gas in Earth's atmosphere?",
-        options: ["Oxygen", "Carbon dioxide", "Nitrogen", "Argon"],
-        correctIndex: 2,
-        explanation: "Nitrogen makes up roughly 78% of the atmosphere; oxygen is about 21%.",
-      },
-      {
-        id: "sc-5",
-        question: "What fundamental force keeps objects on the ground?",
-        options: ["Magnetism", "Gravity", "Friction", "Tension"],
-        correctIndex: 1,
-        explanation: "Gravity is the attraction between masses, described by Einstein's general relativity.",
-      },
-      {
-        id: "sc-6",
-        question: "What is the approximate speed of light in a vacuum?",
-        options: ["150,000 km/s", "300,000 km/s", "1,000,000 km/s", "30,000 km/s"],
-        correctIndex: 1,
-        explanation: "Exactly 299,792,458 m/s — the universe's ultimate speed limit and a defined constant.",
-      },
-      {
-        id: "sc-7",
-        question: "What is the pH value of pure water at 25°C?",
-        options: ["0", "7", "14", "1"],
-        correctIndex: 1,
-        explanation: "pH 7 is neutral — equal concentrations of H⁺ and OH⁻ ions.",
-      },
-      {
-        id: "sc-8",
-        question: "Which scientist proposed the three laws of motion?",
-        options: ["Albert Einstein", "Galileo Galilei", "Isaac Newton", "Nikola Tesla"],
-        correctIndex: 2,
-        explanation: "Newton published them in 1687 in the Principia Mathematica.",
-      },
-    ],
-  },
-  {
-    id: "technology",
-    title: "Technology & Computing",
-    description: "Hardware, the web, and programming history.",
-    category: "Technology",
-    icon: "💻",
-    difficulty: "medium",
-    questions: [
-      {
-        id: "tc-1",
-        question: "What does the acronym HTML stand for?",
-        options: ["HyperText Markup Language", "High Tech Modern Language", "Hyperlink Text Mode Language", "Home Tool Markup Language"],
-        correctIndex: 0,
-        explanation: "HTML is the standard markup language for documents on the web.",
-      },
-      {
-        id: "tc-2",
-        question: "Which company created the JavaScript programming language?",
-        options: ["Microsoft", "Netscape", "Sun Microsystems", "Google"],
-        correctIndex: 1,
-        explanation: "Brendan Eich created it at Netscape in 1995 in just ten days.",
-      },
-      {
-        id: "tc-3",
-        question: "What is the binary representation of decimal 10?",
-        options: ["1100", "1010", "1001", "1110"],
-        correctIndex: 1,
-        explanation: "8 + 2 = 10, so the bits set are 1010.",
-      },
-      {
-        id: "tc-4",
-        question: "In which year was the first iPhone released?",
-        options: ["2005", "2007", "2009", "2010"],
-        correctIndex: 1,
-        explanation: "Steve Jobs introduced the iPhone on 9 January 2007, launching that June.",
-      },
-      {
-        id: "tc-5",
-        question: "What does CPU stand for?",
-        options: ["Central Processing Unit", "Computer Personal Unit", "Central Program Utility", "Core Processing Unifier"],
-        correctIndex: 0,
-        explanation: "The CPU executes instructions and is often called the brain of the computer.",
-      },
-      {
-        id: "tc-6",
-        question: "Which protocol is used to send email between servers?",
-        options: ["HTTP", "FTP", "SMTP", "SSH"],
-        correctIndex: 2,
-        explanation: "Simple Mail Transfer Protocol handles outgoing mail; POP3/IMAP handle retrieval.",
-      },
-      {
-        id: "tc-7",
-        question: "Who is credited as the first computer programmer?",
-        options: ["Ada Lovelace", "Alan Turing", "Grace Hopper", "Charles Babbage"],
-        correctIndex: 0,
-        explanation: "In the 1840s Lovelace wrote an algorithm intended for Babbage's Analytical Engine.",
-      },
-      {
-        id: "tc-8",
-        question: "What does the acronym SQL stand for?",
-        options: ["Structured Query Language", "Simple Question Language", "System Quality Logic", "Server Query Link"],
-        correctIndex: 0,
-        explanation: "SQL is the standard language for relational database queries.",
-      },
-    ],
-  },
-  {
-    id: "geography",
-    title: "World Geography",
-    description: "Borders, rivers, capitals, and record holders.",
-    category: "Geography",
-    icon: "🌍",
-    difficulty: "hard",
-    questions: [
-      {
-        id: "ge-1",
-        question: "Which mountain range contains Mount Everest?",
-        options: ["Andes", "Alps", "Himalayas", "Rockies"],
-        correctIndex: 2,
-        explanation: "Everest (8,849 m) straddles the Nepal–China border in the Himalayas.",
-      },
-      {
-        id: "ge-2",
-        question: "Which country has the most islands?",
-        options: ["Indonesia", "Sweden", "Philippines", "Canada"],
-        correctIndex: 1,
-        explanation: "Sweden has over 260,000 islands, most of them uninhabited.",
-      },
-      {
-        id: "ge-3",
-        question: "What is the largest desert in the world?",
-        options: ["Sahara", "Antarctic Desert", "Gobi", "Arabian Desert"],
-        correctIndex: 1,
-        explanation: "Deserts are defined by low precipitation, so Antarctica (~14 million km²) qualifies.",
-      },
-      {
-        id: "ge-4",
-        question: "Which country is home to the Great Barrier Reef?",
-        options: ["Brazil", "Mexico", "Australia", "Indonesia"],
-        correctIndex: 2,
-        explanation: "It stretches over 2,300 km off Queensland's coast and is visible from space.",
-      },
-      {
-        id: "ge-5",
-        question: "Which is the smallest country in the world by area?",
-        options: ["Monaco", "Vatican City", "San Marino", "Liechtenstein"],
-        correctIndex: 1,
-        explanation: "Vatican City covers about 0.49 km² — less than a square kilometre.",
-      },
-      {
-        id: "ge-6",
-        question: "Lake Baikal, the world's deepest lake, lies mostly in which country?",
-        options: ["Mongolia", "Kazakhstan", "Russia", "China"],
-        correctIndex: 2,
-        explanation: "Baikal reaches 1,642 m deep and holds about 20% of Earth's unfrozen freshwater.",
-      },
-      {
-        id: "ge-7",
-        question: "Which river is generally considered the longest in the world?",
-        options: ["Amazon", "Nile", "Yangtze", "Mississippi"],
-        correctIndex: 1,
-        explanation: "The Nile is measured at ~6,650 km; some studies argue the Amazon is longer.",
-      },
-      {
-        id: "ge-8",
-        question: "Which African country was formerly known as Abyssinia?",
-        options: ["Eritrea", "Sudan", "Ethiopia", "Somalia"],
-        correctIndex: 2,
-        explanation: "Ethiopia is one of the oldest independent countries, never fully colonised.",
-      },
-    ],
-  },
-];
-
-export function getQuizSummaries(): QuizSummary[] {
-  return QUIZZES.map(({ id, title, description, category, icon, difficulty, questions }) => ({
-    id,
-    title,
-    description,
-    category,
-    icon,
-    difficulty,
-    questionCount: questions.length,
-  }));
-}
-
-export function getQuiz(id: string): Quiz | undefined {
-  return QUIZZES.find((quiz) => quiz.id === id);
-}
-
-/** Quiz payload for the browser: strips correct answers and explanations. */
-export function toClientQuiz(quiz: Quiz): QuizClient {
-  return {
-    id: quiz.id,
-    title: quiz.title,
-    description: quiz.description,
-    category: quiz.category,
-    icon: quiz.icon,
-    difficulty: quiz.difficulty,
-    questionCount: quiz.questions.length,
-    questions: quiz.questions.map(({ id, question, options }) => ({ id, question, options })),
-  };
 }
 
 export interface BreakdownItem {
@@ -356,6 +58,30 @@ export interface GradeResult {
   total: number;
   percentage: number;
   breakdown: BreakdownItem[];
+}
+
+export function toClientQuiz(quiz: Quiz): QuizClient {
+  return {
+    id: quiz.id,
+    title: quiz.title,
+    description: quiz.description,
+    category: quiz.category,
+    icon: quiz.icon,
+    difficulty: quiz.difficulty,
+    questions: quiz.questions.map(({ id, question, options }) => ({ id, question, options })),
+  };
+}
+
+export function toSummary(quiz: Quiz): QuizSummary {
+  return {
+    id: quiz.id,
+    title: quiz.title,
+    description: quiz.description,
+    category: quiz.category,
+    icon: quiz.icon,
+    difficulty: quiz.difficulty,
+    questionCount: quiz.questions.length,
+  };
 }
 
 /**
